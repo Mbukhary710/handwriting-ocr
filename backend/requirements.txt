@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pytesseract
+opencv-python
+numpy
+pillow
+google-cloud-vision
