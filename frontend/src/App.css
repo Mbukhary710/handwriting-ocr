@@ -1,0 +1,179 @@
+/* 🌄 Global Styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'Noto Sans Hausa', 'Amiri', sans-serif;
+  background: linear-gradient(135deg, #edf2f7, #cfd9df);
+}
+
+/* 🧠 Main Layout */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 10px;
+}
+
+/* 💳 Card Container */
+.card {
+  width: 100%;
+  max-width: 750px;
+  background: #fff;
+  padding: 35px 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.card h1 {
+  color: #222;
+  margin-bottom: 10px;
+  font-size: 1.8rem;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+/* 📤 Upload Button */
+.upload-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.upload-btn:hover {
+  background: #0056b3;
+}
+
+.upload-btn input {
+  display: none;
+}
+
+.filename {
+  margin-top: 10px;
+  color: #444;
+}
+
+/* 🖼 Preview */
+.preview img {
+  width: 100%;
+  max-height: 350px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-top: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ⏳ Loading */
+.loading p {
+  color: #007bff;
+  font-weight: 500;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #eee;
+  border-radius: 5px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 10px;
+  background: #007bff;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+/* ❌ Error */
+.error-box {
+  margin-top: 20px;
+  background: #ffe6e6;
+  color: #b30000;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* 📜 Output */
+.result-section {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.result-section h3 {
+  color: #333;
+}
+
+.output {
+  width: 100%;
+  height: 250px;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-family: monospace;
+  background: #fafafa;
+  color: #222;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.output.rtl {
+  font-family: 'Amiri', serif;
+}
+
+/* 🔘 Buttons */
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn.copy {
+  background: #17a2b8;
+}
+
+.btn.copy:hover {
+  background: #138496;
+}
+
+.btn.copied {
+  background: #28a745;
+}
+
+.btn.pdf {
+  background: green;
+}
+
+.btn.pdf:hover {
+  background: #046b04;
+}
+
+.btn.docx {
+  background: #007bff;
+}
+
+.btn.docx:hover {
+  background: #0056b3;
+}
