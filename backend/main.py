@@ -8,56 +8,57 @@ from reportlab.pdfgen import canvas
 import io
 import os
 import uuid
+import json
+import tempfile
 
 app = FastAPI(title="Handwriting OCR API v7 (Arabic + Hausa + French Supported)")
 
 # ---------- STEP 1: ENABLE CORS ----------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # change this later to your frontend URL
+    allow_origins=["*"],  # Update to frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ---------- STEP 2: GOOGLE VISION SETUP ----------
-# We rely on Render Secret Environment or Local Dev Key
-GOOGLE_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
 
-if GOOGLE_CREDENTIALS and os.path.exists(GOOGLE_CREDENTIALS):
+if GOOGLE_CREDENTIALS_JSON:
+    # Save JSON to a temporary file
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+    tmp_file.write(GOOGLE_CREDENTIALS_JSON.encode())
+    tmp_file.flush()
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = tmp_file.name
     client = vision.ImageAnnotatorClient()
 else:
-    # Fallback for local dev only (optional)
+    # Fallback for local dev
     local_key = r"C:\Users\Hamada Salim G Trd\Desktop\handwriting-ocr\backend\write2doc-862dc6095d89.json"
     if os.path.exists(local_key):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = local_key
         client = vision.ImageAnnotatorClient()
     else:
         raise EnvironmentError(
-            "❌ Missing Google Vision credentials. Set GOOGLE_APPLICATION_CREDENTIALS in Render secrets."
+            "❌ Missing Google Vision credentials. Set GOOGLE_APPLICATION_CREDENTIALS_JSON in Render secrets."
         )
 
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 
 # ---------- STEP 3: OCR FUNCTIONS ----------
 def extract_text_from_image(content: bytes) -> str:
     """Extract text from an image (supports Arabic, Hausa, English, French)"""
     image = vision.Image(content=content)
     image_context = {"language_hints": ["ar", "en", "ha", "fr"]}
-
     response = client.document_text_detection(image=image, image_context=image_context)
     if response.error.message:
         raise Exception(response.error.message)
-
     return response.full_text_annotation.text.strip()
 
-
 def extract_text_from_pdf(content: bytes) -> str:
-    """Extract text from a PDF using Google OCR (no Poppler required)"""
-    mime_type = "application/pdf"
-    input_doc = vision.InputConfig(content=content, mime_type=mime_type)
+    """Extract text from a PDF using Google OCR"""
+    input_doc = vision.InputConfig(content=content, mime_type="application/pdf")
     feature = vision.Feature(type_=vision.Feature.Type.DOCUMENT_TEXT_DETECTION)
     image_context = {"language_hints": ["ar", "en", "ha", "fr"]}
     request = vision.AnnotateFileRequest(
@@ -65,15 +66,12 @@ def extract_text_from_pdf(content: bytes) -> str:
         input_config=input_doc,
         image_context=image_context
     )
-
     result = client.batch_annotate_files(requests=[request])
     extracted_text = ""
     for response in result.responses:
         for page in response.responses:
-            text = page.full_text_annotation.text
-            extracted_text += text + "\n\n"
+            extracted_text += page.full_text_annotation.text + "\n\n"
     return extracted_text.strip()
-
 
 # ---------- STEP 4: MAIN OCR ROUTE ----------
 @app.post("/ocr/")
@@ -92,24 +90,21 @@ async def ocr_file(file: UploadFile = File(...)):
         if not extracted_text.strip():
             return JSONResponse({"message": "❌ No readable text found."}, status_code=400)
 
-        # ---------- Generate unique output filenames ----------
         uid = str(uuid.uuid4())[:8]
         pdf_path = os.path.join(OUTPUT_DIR, f"ocr_{uid}.pdf")
         docx_path = os.path.join(OUTPUT_DIR, f"ocr_{uid}.docx")
 
-        # ---------- Create DOCX ----------
+        # Create DOCX
         doc = Document()
         doc.add_heading("Extracted Handwritten Text", level=1)
         doc.add_paragraph(extracted_text)
         doc.save(docx_path)
 
-        # ---------- Create PDF ----------
+        # Create PDF
         pdf_buffer = io.BytesIO()
         c = canvas.Canvas(pdf_buffer, pagesize=letter)
         c.setFont("Helvetica", 10)
         y = 750
-
-        # Handle Arabic direction (RTL)
         for line in extracted_text.split("\n"):
             if any("\u0600" <= ch <= "\u06FF" for ch in line):
                 c.drawRightString(550, y, line)
@@ -120,7 +115,6 @@ async def ocr_file(file: UploadFile = File(...)):
                 c.showPage()
                 y = 750
         c.save()
-
         with open(pdf_path, "wb") as f:
             f.write(pdf_buffer.getvalue())
 
@@ -136,7 +130,6 @@ async def ocr_file(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-
 # ---------- STEP 5: DOWNLOAD ROUTES ----------
 @app.get("/download/pdf/{uid}")
 async def download_pdf(uid: str):
@@ -145,14 +138,16 @@ async def download_pdf(uid: str):
         return JSONResponse({"error": "File not found"}, status_code=404)
     return FileResponse(path, filename=f"ocr_{uid}.pdf", media_type="application/pdf")
 
-
 @app.get("/download/docx/{uid}")
 async def download_docx(uid: str):
     path = os.path.join(OUTPUT_DIR, f"ocr_{uid}.docx")
     if not os.path.exists(path):
         return JSONResponse({"error": "File not found"}, status_code=404)
-    return FileResponse(path, filename=f"ocr_{uid}.docx", media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-
+    return FileResponse(
+        path,
+        filename=f"ocr_{uid}.docx",
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
 @app.get("/")
 def home():
