@@ -12,6 +12,11 @@ function App() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
+  // ✅ Backend URL (Render)
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://handwriting-ocr-h4x8.onrender.com";
+
   const handleUpload = async (e) => {
     const selected = e.target.files[0];
     if (!selected) return;
@@ -29,7 +34,8 @@ function App() {
     formData.append("file", selected);
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/ocr/", formData, {
+      // ✅ Use deployed backend URL
+      const res = await axios.post(`${API_BASE_URL}/ocr/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (p) => {
           const percent = Math.round((p.loaded * 100) / p.total);
@@ -255,7 +261,6 @@ function App() {
         )}
       </div>
 
-      {/* --- POWERED BY FOOTER --- */}
       <p
         style={{
           marginTop: "20px",
