@@ -12,10 +12,8 @@ function App() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
-  // ✅ Backend URL (Render)
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://handwriting-ocr-h4x8.onrender.com";
+  // ✅ Backend URL fixed (no .env required)
+  const API_BASE_URL = "https://handwriting-ocr-h4x8.onrender.com";
 
   const handleUpload = async (e) => {
     const selected = e.target.files[0];
@@ -34,7 +32,6 @@ function App() {
     formData.append("file", selected);
 
     try {
-      // ✅ Use deployed backend URL
       const res = await axios.post(`${API_BASE_URL}/ocr/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (p) => {
@@ -89,7 +86,7 @@ function App() {
       >
         <h1 style={{ color: "#222", marginBottom: "10px" }}>✍️ Multi-Language Handwriting OCR</h1>
         <p style={{ color: "#666", marginBottom: "25px", fontSize: "15px" }}>
-          Upload your <b>image</b> or <b>PDF</b> to extract handwritten text.  
+          Upload your <b>image</b> or <b>PDF</b> to extract handwritten text.<br />
           Supports <b>English, French, Hausa & Arabic</b>.
         </p>
 

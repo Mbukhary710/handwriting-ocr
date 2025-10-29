@@ -1,10 +1,22 @@
-fastapi
-uvicorn
-pytesseract
-opencv-python
-numpy
-pillow
-google-cloud-vision
-python-docx
-reportlab
-python-multipart
+# ---- FastAPI & Server ----
+fastapi==0.115.2
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+
+# ---- OCR & Vision ----
+pytesseract==0.3.13
+opencv-python-headless==4.10.0.84
+numpy==1.26.4
+pillow==10.4.0
+google-cloud-vision==3.7.4
+easyocr==1.7.1
+torch==2.4.1
+torchvision==0.19.1
+
+# ---- Document Creation ----
+python-docx==1.1.2
+reportlab==4.2.2
+
+# ---- Translation & Utils ----
+deep-translator==1.11.4
+requests==2.32.3
