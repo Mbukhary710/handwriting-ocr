@@ -10,7 +10,7 @@ numpy==1.26.4
 pillow==10.4.0
 google-cloud-vision==3.7.4
 easyocr==1.7.1
-torch==2.4.1
+torch==2.5.1
 torchvision==0.19.1
 
 # ---- Document Creation ----
